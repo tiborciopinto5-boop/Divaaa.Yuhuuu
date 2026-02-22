@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultimate Birthday App</title>
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0a0a0a;
+  padding: 10px;
+  color: white;
+  overflow-x: hidden;
+}
+
+/* Sections */
+.section {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+  border-radius: 12px;
+  overflow-y: auto;
+  display: none;
+  text-align: center;
+  color: white;
+  box-shadow: 0 10px 35px rgba(255, 255, 255, 0.3),
+              0 15px 50px rgba(10, 47, 90, 0.6);
+  transition: all 0.6s ease;
+}
+.active {
+  display: block;
+  animation: sectionEntry 1s ease forwards;
+}
+
+/* Neon rotating border */
+.section::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border-radius: 14px;
+  padding: 2px;
+  background: conic-gradient(#ff69b4, #0a2f5a, #ff69b4, #0a2f5a);
+  z-index: -1;
+  animation: rotateNeon 6s linear infinite;
+}
+
+/* Hover effect */
+.section:hover {
+  transform: translateY(-12px) scale(1.05) rotate(-2deg);
+  box-shadow: 0 25px 50px rgba(255, 255, 255, 0.7),
+              0 30px 60px rgba(10, 47, 90, 0.7);
+  filter: brightness(1.2) saturate(1.2);
+}
+
+/* Backgrounds */
+#login,
+#quiz,
+#gallery,
+#birthday {
+  background: linear-gradient(135deg, #ff69b4, #0a2f5a);
+  border: 1px solid #ff69b4;
+  position: relative;
+  z-index: 0;
+}
+
+/* Nav */
+nav {
+  display: flex;
+  justify-content: center;
+  font-size: 16px;
+  margin-bottom: 12px;
+  padding-bottom: 6px;
+  cursor: pointer;
+}
+nav span {
+  font-weight: 700;
+  color: white;
+  transition: all 0.6s ease;
+}
+
+/* Inputs & Button */
+input[type=text],
+input[type=password] {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ff69b4;
+  border-radius: 8px;
+  background: #111;
+  color: white;
+  font-size: 14px;
+  transition: all 0.5s ease;
+}
+input:focus {
+  outline: none;
+  border-color: #0a2f5a;
+  box-shadow: 0 0 18px #ff69b4;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #ff69b4, #0a2f5a);
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 5px 25px rgba(255, 105, 180, 0.7);
+  transition: all 0.5s ease;
+}
+button:hover {
+  transform: translateY(-6px) scale(1.12) rotate(-3deg);
+  box-shadow: 0 20px 50px rgba(255, 105, 180, 0.9),
+              0 25px 60px rgba(10, 47, 90, 0.9);
+  filter: brightness(1.4) saturate(1.5);
+}
+
+/* Quiz */
+.quiz-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.question {
+  font-size: 14px;
+  text-align: left;
+  color: white;
+}
+.options {
+  display: flex;
+  flex-direction: column;
+  margin-top: 6px;
+}
+.options label {
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  color: white;
+}
+.options input[type='radio'] {
+  margin-right: 8px;
+}
+
+/* Gallery */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+  justify-items: center;
+}
+.gallery-grid img {
+  width: 100%;
+  aspect-ratio: 4 / 5; 
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 0 28px #ff69b4, 0 0 45px #0a2f5a;
+  transition: transform 0.3s ease;
+  cursor: pointer;
+}
+
+/* Zoom effect saat klik */ 
+.gallery-grid img.zoomed {
+  transform: scale(1.8);
+  z-index: 1000;
+  position: relative;
+}
+
+.caption {
+  font-size: 12px;
+  margin-top: 4px;
+  text-align: center;
+  color: white;
+}
+
+/* Countdown overlay */
+#countdownOverlay {
+  position:absolute; top:0; left:0; width:100%; height:100%;
+  display:flex; justify-content:center; align-items:center;
+  font-size:48px; color:#ff69b4; font-weight:900; 
+  text-align:center; pointer-events:none; opacity:0; transition:opacity 0.3s;
+}
+
+/* Birthday */
+.cake-container {
+  position: relative;
+  display: inline-block;
+  margin-top: 10px;
+  animation: bounceCake 1s ease infinite alternate;
+}
+.cake {
+  font-size: 70px;
+  text-shadow: 0 0 18px #ff69b4, 0 0 30px #0a2f5a;
+}
+.title {
+  margin-top: 15px;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  animation: titleGlow 2s ease-in-out infinite alternate;
+}
+.message {
+  margin-top: 10px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: white;
+  animation: messagePulse 2s infinite alternate;
+}
+.wishes {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 20px;
+}
+.wish {
+  text-align: center;
+  font-size: 14px;
+  color: white;
+  animation: wishPulse 1.5s infinite alternate;
+}
+
+/* Confetti */
+.confetti {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  top: 0;
+  animation: fall 3s linear infinite;
+}
+
+/* Animations */
+@keyframes sectionEntry {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes rotateNeon {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes titleGlow {
+  0% { text-shadow:0 0 12px #ff69b4,0 0 25px #0a2f5a; }
+  100% { text-shadow:0 0 25px #ff69b4,0 0 40px #0a2f5a; }
+}
+@keyframes messagePulse {
+  0% { transform: scale(1); opacity:1; }
+  100% { transform: scale(1.07); opacity:0.85; }
+}
+@keyframes wishPulse {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-6px); }
+}
+@keyframes bounceCake {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-10px); }
+}
+@keyframes fall {
+  0% { transform: translateY(-10px) rotate(0deg); }
+  100% { transform: translateY(500px) rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .section { max-width: 95vw; padding: 15px; }
+  .cake { font-size: 55px; }
+  .title { font-size: 24px; }
+  .message, .wish { font-size: 13px; }
+  .options label { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login -->
+<div class="section active" id="login">
+  <nav><span>Login yuk Biba Yuhuu</span></nav>
+  <input type="text" placeholder="PIN">
+  <button onclick="showSection('quiz')">Login</button>
+</div>
+
+<!-- Quiz -->
+<div class="section" id="quiz">
+  <nav><span>Isi quiz nya yuk Biba Yuhuu</span></nav>
+  <div id="quizResult"></div> 
+  <div class="quiz-container">
+    <div class="question">
+      1. Zodiac sign for Feb 23?
+      <div class="options">
+        <label><input type="radio" name="q1"> Pisces</label>
+        <label><input type="radio" name="q1"> Aries</label>
+      </div>
+    </div>
+    <div class="question">
+      2. Days in a leap February?
+      <div class="options">
+        <label><input type="radio" name="q2"> 28</label>
+        <label><input type="radio" name="q2"> 29</label>
+      </div>
+    </div>
+    <div class="question">
+      3. Defender Day belongs to?
+      <div class="options">
+        <label><input type="radio" name="q3"> Russia</label>
+        <label><input type="radio" name="q3"> Japan</label>
+      </div>
+    </div>
+    <div class="question">
+      4. Normal February has how many days?
+      <div class="options">
+        <label><input type="radio" name="q4"> 28</label>
+        <label><input type="radio" name="q4"> 30</label>
+      </div>
+    </div>
+    <div class="question">
+      5. Feb 23 falls on which week of February?
+      <div class="options">
+        <label><input type="radio" name="q5"> 5</label>
+        <label><input type="radio" name="q5"> 8</label>
+      </div>
+    </div>
+  </div>
+  <button onclick="validateQuiz()">Finish</button>
+</div>
+
+<!-- Gallery -->
+<div class="section" id="gallery">
+  <nav><span>Foto lucu Biba Yuhuu</span></nav>
+  <div class="gallery-grid">
+    <div>
+      <img src="image/biba-optimized.jpeg" alt="foto 1" loading="lazy">
+      <div class="caption">Nee cute los to + Gemoy + elegan los to jujur det. Banyak gaya los</div>
+    </div>
+    <div>
+      <img src="image/biba1-optimized.jpeg" alt="foto 2" loading="lazy">
+      <div class="caption">Nemos cantik demais to mirror terharu sampe mau nangis jujur det sah humm. Tengil los</div>
+    </div>
+    <div>
+      <img src="image/biba2-optimized.jpeg" alt="foto 3" loading="lazy">
+      <div class="caption">Uhhh nee cantik hnsa tia ba nia damege +++ cantiknya gak kalah dengan sunset. No cap</div>
+    </div>
+    <div>
+      <img src="image/biba3-optimized.jpeg" alt="foto 4" loading="lazy">
+      <div class="caption">Selfie dulu gues. The sun the moon end nia ema hahaha...</div>
+    </div>
+  </div>
+  <!-- Countdown Overlay -->
+  <div id="countdownOverlay"></div>
+  <!-- Countdown music -->
+  <audio id="countdownMusic" src="hbd1.mp3"></audio>
+  <button onclick="goToBirthdayWithDelay()">Next</button>
+</div>
+
+<!-- Birthday -->
+<div class="section" id="birthday">
+  <nav><span>Happy Birthday</span><span>Bibaaa</span></nav>
+  <audio id="birthdayMusic" src="hbd.mp3" autoplay loop></audio>
+  <div class="cake-container">
+    <div class="cake">🎂</div>
+  </div>
+  <div class="title">Happy Birthday Bibaaa Yuhuuu</div>
+  <div class="message">
+    Wishing you a day full of happiness and a year full of joy and success!
+  </div>
+  <div class="wishes">
+    <div class="wish">May your day be filled with smiles!</div>
+    <div class="wish">Stay healthy and strong!</div>
+    <div class="wish">May all your dreams come true!</div>
+    <div class="wish">Keep shining and spreading joy!</div>
+  </div>
+  <button onclick="closeApp()">Thank You</button>
+</div>
+
+<script>
+function showSection(id){
+  document.querySelectorAll('.section').forEach(sec=>sec.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  createFireworks(id);
+  if(id==='birthday') {
+    createConfetti(id);
+    const music = document.getElementById('birthdayMusic');
+    if(music) music.play().catch(e=>console.log('Autoplay blocked'));
+  }
+}
+
+// Fitur delay 5 detik + countdown + surprise + countdown music
+function goToBirthdayWithDelay() {
+  const button = event.target;
+  button.disabled = true;
+  button.textContent = "Get Ready...";
+
+  const overlay = document.getElementById('countdownOverlay');
+  overlay.style.opacity = 1;
+
+  const countdownMusic = document.getElementById('countdownMusic');
+  if(countdownMusic){
+    countdownMusic.currentTime = 0;
+    countdownMusic.play().catch(e=>console.log('Autoplay countdown blocked'));
+  }
+
+  const countdownNumbers = ["3", "2", "1", "Surprise Biba Yuhuuuu!"];
+  let i = 0;
+
+  function showNext() {
+    if(i >= countdownNumbers.length) {
+      overlay.style.opacity = 0;
+      if(countdownMusic) countdownMusic.pause();
+      showSection('birthday');
+      return;
+    }
+
+    overlay.textContent = countdownNumbers[i];
+    overlay.style.transform = `scale(${1 + Math.random()}) rotate(${Math.random()*60-30}deg)`;
+    overlay.style.color = ['#ff69b4','#0a2f5a','#ff1493','#4d1a75','#ff85c1'][Math.floor(Math.random()*5)];
+    overlay.style.textShadow = `
+      0 0 10px ${overlay.style.color}, 
+      0 0 20px ${overlay.style.color}, 
+      0 0 30px ${overlay.style.color},
+      0 0 40px ${overlay.style.color}
+    `;
+    i++;
+    setTimeout(showNext, 1000);
+  }
+
+  showNext();
+}
+
+// Validate quiz
+function validateQuiz(){
+  const totalQuestions = 5;
+  const answered = document.querySelectorAll('#quiz input[type="radio"]:checked').length;
+  if(answered < totalQuestions){alert("Please answer all questions first."); return;}
+
+  const correctAnswers = {
+    q1: "Pisces",
+    q2: "29",
+    q3: "Russia",
+    q4: "28",
+    q5: "5"
+  };
+
+  let score = 0;
+  for(const q in correctAnswers){
+    const selected = document.querySelector(`#quiz input[name="${q}"]:checked`);
+    if(selected && selected.parentElement.textContent.trim() === correctAnswers[q]){
+      score++;
+    }
+  }
+
+  let resultDiv = document.getElementById('quizResult');
+  if(!resultDiv){
+    resultDiv = document.createElement('div');
+    resultDiv.id = 'quizResult';
+    resultDiv.style.fontWeight = 'bold';
+    resultDiv.style.marginTop = '15px';
+    document.getElementById('quiz').appendChild(resultDiv);
+  }
+  resultDiv.textContent = `Your quiz score: ${score} / ${totalQuestions}`;
+
+  setTimeout(()=>{
+    showSection('gallery');
+  }, 2000);
+}
+
+function createFireworks(sectionId){
+  const section = document.getElementById(sectionId);
+  for(let i=0;i<20;i++){
+    const fire=document.createElement('div');
+    fire.classList.add('firework');
+    fire.style.left=Math.random()*section.offsetWidth+'px';
+    fire.style.top=Math.random()*section.offsetHeight+'px';
+    fire.style.background=['#ff69b4','#0a2f5a','#ff1493','#4d1a75','#ff85c1'][Math.floor(Math.random()*5)];
+    section.appendChild(fire);
+    setTimeout(()=>fire.remove(),800);
+  }
+}
+
+function createConfetti(sectionId){
+  const section = document.getElementById(sectionId);
+  for(let i=0;i<50;i++){
+    const conf = document.createElement('div');
+    conf.classList.add('confetti');
+    conf.style.left=Math.random()*section.offsetWidth+'px';
+    conf.style.animationDelay=(Math.random()*3)+'s';
+    conf.style.background=['#ff69b4','#0a2f5a','#ff1493','#4d1a75','#ff85c1'][Math.floor(Math.random()*5)];
+    section.appendChild(conf);
+    setTimeout(()=>conf.remove(),4000);
+  }
+}
+
+function closeApp(){
+  window.open('', '_self'); 
+  window.close();
+}
+
+// Zoom foto saat klik
+document.querySelectorAll('.gallery-grid img').forEach(img=>{
+  img.addEventListener('mousedown', ()=> img.classList.add('zoomed'));
+  img.addEventListener('mouseup', ()=> img.classList.remove('zoomed'));
+  img.addEventListener('mouseleave', ()=> img.classList.remove('zoomed'));
+});
+</script>
+
+</body>
+</html>
